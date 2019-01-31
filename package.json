@@ -1,0 +1,25 @@
+{
+  "name": "service-link",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --detectOpenHandles --coverage"
+  },
+  "author": "Ákos Szabacsi",
+  "email": "akos.szabacsi@uhudev.com",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/amqplib": "^0.5.9",
+    "@types/jest": "^23.3.13",
+    "@types/node": "^10.12.18",
+    "@types/uuid": "^3.4.4",
+    "jest": "^23.6.0",
+    "ts-jest": "^23.10.5",
+    "typescript": "^3.2.4"
+  },
+  "dependencies": {
+    "amqplib": "^0.5.3",
+    "uuid": "^3.3.2"
+  }
+}
