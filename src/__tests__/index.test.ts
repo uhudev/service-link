@@ -13,7 +13,7 @@ describe('ServiceLink integration tests', () => {
     const service1 = await createServiceLink(QUEUE, URL);
     const service2 = await createServiceLink(QUEUE, URL);
     service2.listen((data: Buffer) => {
-      return data;
+      return new Promise((resolve, reject) => resolve(data));
     })
     const response = await service1.send({ data: 5 });
     expect(response).toMatchObject({ data: 5});

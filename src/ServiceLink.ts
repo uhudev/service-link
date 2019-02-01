@@ -57,12 +57,13 @@ class ServiceLink extends EventEmitter {
     });
   }
 
-  public listen = (fn: (content: Buffer) => Buffer) => {
+  public listen = (fn: (content: Buffer) => Promise<Buffer>) => {
     console.log('listenning on:' + this.queue);
-    this.channel.consume(this.queue, (msg: amqp.ConsumeMessage | null) => {
+    this.channel.consume(this.queue, async (msg: amqp.ConsumeMessage | null) => {
       if(msg) {
         this.channel.ack(msg);
-        this.channel.sendToQueue(msg.properties.replyTo, fn(msg.content), {
+        const result = await fn(msg.content);
+        this.channel.sendToQueue(msg.properties.replyTo, result, {
           correlationId: msg.properties.correlationId
         });
       }
