@@ -1,6 +1,7 @@
 import * as amqp from 'amqplib';
 import * as uuid from 'uuid';
 import { EventEmitter } from 'events';
+import { bufferize, objectify } from './utils';
 
 interface IRequest {
   id: string;
@@ -43,30 +44,51 @@ class ServiceLink extends EventEmitter {
     });
   }
 
-  public send = async (msg: any) => {
+  public send = async (request: ServiceRequest) => {
     const correlationId = uuid();
-    console.log("Sending message with correlationId: " + correlationId + ' to:' + this.queue);
-    this.channel.sendToQueue(this.queue, Buffer.from(JSON.stringify(msg)), {
+    this.channel.sendToQueue(this.queue, bufferize(request), {
       replyTo: this.ownQueue,
       correlationId,
       contentType: 'JSON'
     });
     return await this.createJob({
       id: correlationId,
-      data: Buffer.from(JSON.stringify(msg))
+      data: bufferize(request)
     });
   }
 
-  public listen = (fn: (content: Buffer) => Promise<Buffer>) => {
+  public listen = (fn: (request: ServiceRequest) => Promise<ResponseData> | ResponseData) => {
     console.log('listenning on:' + this.queue);
-    this.channel.consume(this.queue, async (msg: amqp.ConsumeMessage | null) => {
+    this.channel.consume(this.queue, (msg: amqp.ConsumeMessage | null) => {
       if(msg) {
         this.channel.ack(msg);
-        const result = await fn(msg.content);
-        this.channel.sendToQueue(msg.properties.replyTo, result, {
-          correlationId: msg.properties.correlationId
-        });
+        const requestObject = objectify(msg.content);
+        try {
+          const x = fn(requestObject);
+          if(x instanceof Promise) {
+            x.then(result => {
+              this.reply(msg.properties.replyTo, {request: requestObject, status: 'SUCCESS', data: result}, msg.properties.correlationId);
+            }).catch(err => {
+              this.reply(msg.properties.replyTo, {request: requestObject, status: 'FAILURE', data: x}, msg.properties.correlationId);
+            });
+          } else {
+            this.reply(msg.properties.replyTo, {request: requestObject, status: 'SUCCESS', data: x}, msg.properties.correlationId);
+          }
+        } catch (e) {
+          this.reply(msg.properties.replyTo, {
+            request: requestObject,
+            status: 'FAILURE',
+            data: {}
+          }, msg.properties.correlationId);
+        }
+        
       }
+    });
+  }
+
+  private reply = (queue: string, response: ServiceResponse, correlationId: string) => {
+    this.channel.sendToQueue(queue, Buffer.from(JSON.stringify(response)), {
+      correlationId
     });
   }
 
