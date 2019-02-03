@@ -2,6 +2,7 @@ import * as amqp from 'amqplib';
 import * as uuid from 'uuid';
 import { EventEmitter } from 'events';
 import { bufferize, objectify } from './utils';
+import { Success, Failure } from './ServiceResponse';
 
 interface IRequest {
   id: string;
@@ -13,8 +14,6 @@ class ServiceLink extends EventEmitter {
   private channel: amqp.Channel;
   private ownQueue: string;
   private queue: string;
-
-  // Storing only the correlationId and pop when received response and emit the response
   
   static create = async (queue: string, channel: amqp.Channel) => {
     try {
@@ -36,6 +35,7 @@ class ServiceLink extends EventEmitter {
     this.listenToReply();
   }
 
+  // Storing only the correlationId and pop when received response and emit the response
   private createJob = async (request: IRequest) => {
     return new Promise((resolve, reject) => {
       this.on(request.id, (response) => {
@@ -58,7 +58,6 @@ class ServiceLink extends EventEmitter {
   }
 
   public listen = (fn: (request: ServiceRequest) => Promise<ResponseData> | ResponseData) => {
-    console.log('listenning on:' + this.queue);
     this.channel.consume(this.queue, (msg: amqp.ConsumeMessage | null) => {
       if(msg) {
         this.channel.ack(msg);
@@ -67,19 +66,15 @@ class ServiceLink extends EventEmitter {
           const x = fn(requestObject);
           if(x instanceof Promise) {
             x.then(result => {
-              this.reply(msg.properties.replyTo, {request: requestObject, status: 'SUCCESS', data: result}, msg.properties.correlationId);
+              this.reply(msg.properties.replyTo, new Success(requestObject, result), msg.properties.correlationId);
             }).catch(err => {
-              this.reply(msg.properties.replyTo, {request: requestObject, status: 'FAILURE', data: x}, msg.properties.correlationId);
+              this.reply(msg.properties.replyTo, new Failure(requestObject, err.toString()), msg.properties.correlationId);
             });
           } else {
-            this.reply(msg.properties.replyTo, {request: requestObject, status: 'SUCCESS', data: x}, msg.properties.correlationId);
+            this.reply(msg.properties.replyTo, new Success(requestObject, x), msg.properties.correlationId);
           }
         } catch (e) {
-          this.reply(msg.properties.replyTo, {
-            request: requestObject,
-            status: 'FAILURE',
-            data: {}
-          }, msg.properties.correlationId);
+          this.reply(msg.properties.replyTo, new Failure(requestObject, e.message), msg.properties.correlationId);
         }
         
       }
@@ -95,7 +90,6 @@ class ServiceLink extends EventEmitter {
   private listenToReply = async () => {
     this.channel.consume(this.ownQueue, (msg: amqp.ConsumeMessage | null) => {
       if(msg) {
-        console.log('received a reply with correlationId:' + msg.properties.correlationId);
         this.channel.ack(msg);
         this.emit(msg.properties.correlationId, msg.content);
       }

@@ -21,16 +21,16 @@ describe('ServiceLink integration tests', () => {
   it('Reply with the request message', async () => {
     const service1 = await createServiceLink(QUEUE, URL);
     const service2 = await createServiceLink(QUEUE, URL);
-    const request = { 
+    const request: ServiceRequest = { 
       action: 'FIBONACCI', 
-      data: {
-        n: 6
-      }
+      data: 6
     }
     service2.listen((request: ServiceRequest) => {
       if(request.action === 'FIBONACCI') {
-        return {
-          n: fib(request.data.n),
+        if(typeof request.data === 'number') {
+          return fib(request.data)
+        } else {
+          throw Error('invalid argument');
         }
       } else {
         throw new Error();
@@ -40,9 +40,7 @@ describe('ServiceLink integration tests', () => {
     expect(response).toMatchObject({ 
       request,
       status: 'SUCCESS',
-      data: {
-        n: 8
-      }
+      data: 8
     });
   });
 });

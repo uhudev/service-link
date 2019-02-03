@@ -1,10 +1,14 @@
-interface RequestData {
+interface IRequestData {
   [key: string]: any;
 }
 
-interface ResponseData {
+type RequestData = IRequestData | string | number; 
+
+interface IResponseData {
   [key: string]: any;
 }
+
+type ResponseData = IResponseData | string | number;
 
 interface ServiceRequest {
   action: string;
