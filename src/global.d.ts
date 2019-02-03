@@ -11,10 +11,14 @@ interface ServiceRequest {
   data: RequestData;
 }
 
-type JobStatus = 'SUCCESS' | 'FAILURE';
+type SUCCESS = 'SUCCESS';
+type FAILURE = 'FAILURE';
+
+type JobStatus =  SUCCESS | FAILURE;
 
 interface ServiceResponse {
   request: ServiceRequest,
-  data: Object,
+  data?: Object,
+  err?: string
   status: JobStatus
 }
