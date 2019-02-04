@@ -1,4 +1,4 @@
-import createServiceLink, { createChannel } from '../ServiceLink';
+import ServiceLink, { createChannel } from '../ServiceLink';
 import ServiceRequest, { IServiceRequest } from '../ServiceRequest';
 
 const URL = 'amqp://localhost:5672';
@@ -20,8 +20,8 @@ describe('ServiceLink integration tests', () => {
     expect(ch).toBeTruthy();
   });
   it('Reply with the request message', async () => {
-    const service1 = await createServiceLink(QUEUE, URL);
-    const service2 = await createServiceLink(QUEUE, URL);
+    const service1 = await ServiceLink.create(QUEUE, URL);
+    const service2 = await ServiceLink.create(QUEUE, URL);
     const request: ServiceRequest = { 
       action: 'FIBONACCI', 
       data: 6
