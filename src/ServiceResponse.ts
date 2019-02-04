@@ -1,3 +1,23 @@
+import ServiceRequest from './ServiceRequest';
+
+export interface IResponseData {
+  [key: string]: any;
+}
+
+export type ResponseData = IResponseData | string | number;
+
+export type SUCCESS = 'SUCCESS';
+export type FAILURE = 'FAILURE';
+
+export type JobStatus =  SUCCESS | FAILURE;
+
+export interface ServiceResponse {
+  request: ServiceRequest,
+  data?: Object,
+  err?: string
+  status: JobStatus
+}
+
 class Success implements ServiceResponse {
   
   public readonly status: JobStatus = 'SUCCESS';

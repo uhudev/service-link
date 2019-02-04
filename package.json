@@ -1,12 +1,12 @@
 {
   "name": "@uhudev/service-link",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Library for interprocess communication",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest --detectOpenHandles --coverage",
+    "test": "npm run build && jest --detectOpenHandles --coverage",
     "publish": "npm run build && npm publish"
   },
   "author": "Ákos Szabacsi",

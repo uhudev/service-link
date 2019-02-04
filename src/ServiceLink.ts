@@ -2,7 +2,8 @@ import * as amqp from 'amqplib';
 import * as uuid from 'uuid';
 import { EventEmitter } from 'events';
 import { bufferize, objectify } from './utils';
-import { Success, Failure } from './ServiceResponse';
+import { Success, Failure, ResponseData, ServiceResponse } from './ServiceResponse';
+import ServiceRequest, { IServiceRequest } from './ServiceRequest';
 
 interface IRequest {
   id: string;
@@ -44,7 +45,7 @@ class ServiceLink extends EventEmitter {
     });
   }
 
-  public send = async (request: ServiceRequest) => {
+  public send = async (request: IServiceRequest) => {
     const correlationId = uuid();
     this.channel.sendToQueue(this.queue, bufferize(request), {
       replyTo: this.ownQueue,

@@ -1,4 +1,5 @@
 import createServiceLink, { createChannel } from '../ServiceLink';
+import ServiceRequest, { IServiceRequest } from '../ServiceRequest';
 
 const URL = 'amqp://localhost:5672';
 const QUEUE = 'MASTER';
@@ -25,7 +26,7 @@ describe('ServiceLink integration tests', () => {
       action: 'FIBONACCI', 
       data: 6
     }
-    service2.listen((request: ServiceRequest) => {
+    service2.listen((request: IServiceRequest) => {
       if(request.action === 'FIBONACCI') {
         if(typeof request.data === 'number') {
           return fib(request.data)
