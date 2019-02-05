@@ -21,9 +21,9 @@ class ServiceLink {
     try {
       // These async calls should be run in parallel
       const ch = await createChannel(connectionURL);
-      const qAssertion = await ch.assertQueue(queue);
+      await ch.assertQueue(queue);
       const ownQueue = uuid();
-      const ownQueueAssertion = await ch.assertQueue(ownQueue);
+      await ch.assertQueue(ownQueue);
       return new ServiceLink(queue, ch, ownQueue);
     } catch (e) {
       throw e;
@@ -38,7 +38,7 @@ class ServiceLink {
   }
 
   // Storing only the correlationId and pop when received response and emit the response
-  private createJob = async (request: IRequest) => {
+  private createJob = async (request: IRequest): Promise<ServiceResponse> => {
     return new Promise((resolve, reject) => {
       this.emitter.on(request.id, (response) => {
         resolve(JSON.parse(response));
@@ -46,17 +46,21 @@ class ServiceLink {
     });
   }
 
-  public send = async (request: IServiceRequest) => {
-    const correlationId = uuid();
-    this.channel.sendToQueue(this.queue, bufferize(request), {
-      replyTo: this.ownQueue,
-      correlationId,
-      contentType: 'JSON'
-    });
-    return await this.createJob({
-      id: correlationId,
-      data: bufferize(request)
-    });
+  public send = async (request: IServiceRequest): Promise<ServiceResponse> => {
+    try {
+      const correlationId = uuid();
+      this.channel.sendToQueue(this.queue, bufferize(request), {
+        replyTo: this.ownQueue,
+        correlationId,
+        contentType: 'JSON'
+      });
+      return await this.createJob({
+        id: correlationId,
+        data: bufferize(request)
+      });
+    } catch (e) {
+      throw new Error('Sending or processing message failed!');
+    }
   }
 
   public listen = (fn: (request: ServiceRequest) => Promise<ResponseData> | ResponseData) => {

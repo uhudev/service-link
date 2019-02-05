@@ -4,9 +4,9 @@ interface IRequestData {
 
 export type RequestData = IRequestData | string | number; 
 
-export interface IServiceRequest {
+export interface IServiceRequest<T=RequestData> {
   action: string;
-  data: RequestData;
+  data?: T;
 }
 
 class ServiceRequest implements IServiceRequest {

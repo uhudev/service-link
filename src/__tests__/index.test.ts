@@ -19,7 +19,7 @@ describe('ServiceLink integration tests', () => {
     const ch = await createChannel(URL);
     expect(ch).toBeTruthy();
   });
-  it('Reply with the request message', async () => {
+  it('Should return the fibonacci number', async () => {
     const service1 = await ServiceLink.create(QUEUE, URL);
     const service2 = await ServiceLink.create(QUEUE, URL);
     const request: ServiceRequest = { 
@@ -43,5 +43,22 @@ describe('ServiceLink integration tests', () => {
       status: 'SUCCESS',
       data: 8
     });
+  });
+  it('Should get a FAILURE response status', async () => {
+    const service1 = await ServiceLink.create(QUEUE, URL);
+    const service2 = await ServiceLink.create(QUEUE, URL);
+    service2.listen((request: ServiceRequest) => {
+      const { action, data } = request;
+      if(action === 'FIBONACCI') {
+        return fib(-1);
+      } else {
+        throw new Error('No such action');
+      }
+    });
+    const response = await service1.send({
+      action: 'FIBONACCI',
+      data: -1
+    })
+    expect(response.status).toBe('FAILURE');
   });
 });
