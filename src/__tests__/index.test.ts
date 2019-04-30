@@ -61,4 +61,25 @@ describe('ServiceLink integration tests', () => {
     })
     expect(response.status).toBe('FAILURE');
   });
+  it("Shouldn't get a response", async () => {
+    const service1 = await ServiceLink.create('OTHER_QUEUE', URL);
+    const service2 = await ServiceLink.create(QUEUE, URL);
+    service2.listen((request: ServiceRequest) => {
+      const { action, data } = request;
+      if(action === 'FIBONACCI') {
+        if(typeof data === 'number') {
+          return fib(data);
+        } else {
+          throw new Error('Data is not a number');
+        }  
+      } else {
+        throw new Error('No such action');
+      }
+    });
+    expect(service1.send({
+      action: 'FIBONACCI',
+      data: 10,
+      timeout: 100
+    })).rejects.toThrow('error');
+  });
 });

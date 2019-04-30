@@ -1,10 +1,10 @@
 import ServiceRequest from './ServiceRequest';
 
-export interface IResponseData {
+export interface ResponseDataObject {
   [key: string]: any;
 }
 
-export type ResponseData = IResponseData | string | number;
+export type ResponseData = ResponseDataObject | string | number;
 
 export type SUCCESS = 'SUCCESS';
 export type FAILURE = 'FAILURE';
@@ -13,7 +13,7 @@ export type JobStatus =  SUCCESS | FAILURE;
 
 export interface ServiceResponse {
   request: ServiceRequest,
-  data?: Object,
+  data?: ResponseData,
   err?: string
   status: JobStatus
 }

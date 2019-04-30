@@ -1,6 +1,6 @@
 {
   "name": "@uhudev/service-link",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Library for interprocess communication",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,6 @@
   "email": "akos.szabacsi@uhudev.com",
   "license": "MIT",
   "devDependencies": {
-    "@types/amqplib": "^0.5.9",
     "@types/jest": "^23.3.13",
     "@types/node": "^10.12.18",
     "@types/uuid": "^3.4.4",
@@ -22,6 +21,7 @@
     "typescript": "^3.2.4"
   },
   "dependencies": {
+    "@types/amqplib": "^0.5.9",
     "amqplib": "^0.5.3",
     "uuid": "^3.3.2"
   },

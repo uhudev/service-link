@@ -1,14 +1,17 @@
 import * as amqp from 'amqplib';
 import * as uuid from 'uuid';
 import { EventEmitter } from 'events';
-import { bufferize, objectify } from './utils';
+import { bufferize, objectify, withTimeout } from './utils';
 import { Success, Failure, ResponseData, ServiceResponse } from './ServiceResponse';
 import ServiceRequest, { IServiceRequest } from './ServiceRequest';
+import { clearTimeout } from 'timers';
 
 interface IRequest {
   id: string;
   data: Buffer;
 }
+
+const DEFAULT_TIMEOUT = 4000;
 
 class ServiceLink {
 
@@ -54,10 +57,13 @@ class ServiceLink {
         correlationId,
         contentType: 'JSON'
       });
-      return await this.createJob({
-        id: correlationId,
-        data: bufferize(request)
-      });
+      const response = withTimeout(request.timeout || DEFAULT_TIMEOUT,
+        this.createJob({
+          id: correlationId,
+          data: bufferize(request)
+        })
+      )
+      return response;
     } catch (e) {
       throw new Error('Sending or processing message failed!');
     }

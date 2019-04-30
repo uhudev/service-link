@@ -7,6 +7,7 @@ export type RequestData = IRequestData | string | number;
 export interface IServiceRequest<T=RequestData> {
   action: string;
   data?: T;
+  timeout?: number;
 }
 
 class ServiceRequest implements IServiceRequest {
