@@ -4,7 +4,6 @@ import { EventEmitter } from 'events';
 import { bufferize, objectify, withTimeout } from './utils';
 import { Success, Failure, ResponseData, ServiceResponse } from './ServiceResponse';
 import ServiceRequest, { IServiceRequest } from './ServiceRequest';
-import { clearTimeout } from 'timers';
 
 interface IRequest {
   id: string;
