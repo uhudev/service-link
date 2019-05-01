@@ -1,8 +1,8 @@
-
 const config = {
   instances: {
     uhudev: {
-      url: "amqp://jncuiegn:kH3mdxxi83e_AloMGIN1ELOz5ODLLsjj@gopher.rmq.cloudamqp.com/jncuiegn"
+      url: "amqp://jncuiegn:kH3mdxxi83e_AloMGIN1ELOz5ODLLsjj@gopher.rmq.cloudamqp.com/jncuiegn",
+      queue: 'TEST'
     },
     local: {
       url: "amqp://localhost:5672"

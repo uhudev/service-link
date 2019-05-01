@@ -3,3 +3,8 @@
 /.vscode
 /coverage
 /example
+/__tests__
+jest.config.js
+.travis.yml
+README.md
+tsconfig.json
